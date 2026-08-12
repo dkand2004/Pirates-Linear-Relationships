@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Charting the Linear Seas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a2734;
+  --bg-2:#071c26;
+  --parchment:#f1e2b8;
+  --parchment-dark:#e2cd94;
+  --parchment-line:#c9ad6e;
+  --ink:#3b2a14;
+  --ink-soft:#6b5636;
+  --gold:#d4af37;
+  --gold-dark:#9c7c1f;
+  --wax-red:#7a2e2e;
+  --wax-red-2:#9c3d3d;
+  --sea-green:#2f6e5a;
+  --sea-green-2:#3f8a70;
+  --shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at 15% 0%, #123647 0%, transparent 45%),
+    radial-gradient(circle at 90% 25%, #0e2f3d 0%, transparent 40%),
+    var(--bg);
+  color:var(--ink);
+  font-family:'Inter', sans-serif;
+  min-height:100vh;
+}
+::selection{ background:var(--gold); color:var(--ink); }
+
+/* ---------- HERO ---------- */
+.hero{
+  position:relative;
+  padding:70px 20px 50px;
+  text-align:center;
+  overflow:hidden;
+  border-bottom:6px double var(--gold-dark);
+  background: var(--bg-2);
+}
+.hero::before{
+  content:"";
+  position:absolute; inset:0;
+  background-image: radial-gradient(circle, rgba(212,175,55,0.06) 1px, transparent 1px);
+  background-size: 22px 22px;
+  pointer-events:none;
+}
+.badge{
+  display:inline-block;
+  font-family:'IBM Plex Mono', monospace;
+  font-size:12px;
+  letter-spacing:3px;
+  color:var(--gold);
+  border:1px solid var(--gold-dark);
+  padding:6px 14px;
+  border-radius:2px;
+  text-transform:uppercase;
+  margin-bottom:22px;
+  background:rgba(212,175,55,0.06);
+}
+h1.title{
+  font-family:'Pirata One', cursive;
+  color:var(--parchment);
+  font-size:clamp(38px, 7vw, 68px);
+  margin:0 0 10px;
+  letter-spacing:1px;
+  text-shadow: 0 2px 0 rgba(0,0,0,0.4);
+}
+.subtitle{
+  color:#c3d3d6;
+  font-size:18px;
+  max-width:660px;
+  margin:0 auto 34px;
+  line-height:1.6;
+}
+.subtitle b{ color:var(--gold); }
+
+.memo{
+  max-width:640px;
+  margin:0 auto;
+  background:var(--parchment);
+  color:var(--ink);
+  padding:26px 28px;
+  border-radius:2px;
+  text-align:left;
+  position:relative;
+  box-shadow:var(--shadow);
+  transform:rotate(-1deg);
+  border-left:6px solid var(--wax-red);
+}
+.memo::before{
+  content:"CAPTAIN'S ORDERS";
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  letter-spacing:3px;
+  color:var(--wax-red);
+  font-weight:700;
+}
+.memo p{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:14.5px;
+  line-height:1.75;
+  margin:10px 0 0;
+  color:var(--ink-soft);
+}
+.seal{
+  position:absolute; top:-12px; left:50%; transform:translateX(-50%) rotate(-6deg);
+  width:34px;height:34px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #a84545, var(--wax-red));
+  box-shadow:0 3px 4px rgba(0,0,0,0.5);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Pirata One',cursive;
+  color:#f1d9d9;
+  font-size:16px;
+}
+
+/* ---------- NAV TABS ---------- */
+.tabs-wrap{
+  position:sticky; top:0; z-index:50;
+  background:var(--bg-2);
+  border-bottom:3px solid var(--gold-dark);
+  padding:0 12px;
+  display:flex;
+  overflow-x:auto;
+  scrollbar-width:thin;
+}
+.tab{
+  font-family:'Pirata One', cursive;
+  background:var(--parchment-dark);
+  color:var(--ink-soft);
+  border:none;
+  padding:14px 22px 12px;
+  margin:8px 4px 0;
+  cursor:pointer;
+  font-size:17px;
+  border-radius:6px 6px 0 0;
+  position:relative;
+  white-space:nowrap;
+  opacity:0.72;
+  transition:all .2s ease;
+  flex-shrink:0;
+}
+.tab:hover{ opacity:1; transform:translateY(-2px); }
+.tab.active{
+  background:var(--parchment);
+  color:var(--ink);
+  opacity:1;
+  box-shadow:0 -3px 10px rgba(0,0,0,0.25);
+}
+.tab .stamp-mini{
+  display:none;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;
+  color:var(--sea-green);
+  border:1px solid var(--sea-green);
+  border-radius:3px;
+  padding:1px 5px;
+  margin-left:8px;
+  vertical-align:middle;
+}
+.tab.solved .stamp-mini{ display:inline-block; }
+
+/* ---------- CHART SECTIONS ---------- */
+.case{
+  display:none;
+  max-width:960px;
+  margin:0 auto;
+  padding:44px 20px 80px;
+  animation:fadeIn .35s ease;
+}
+.case.active{ display:block; }
+@keyframes fadeIn{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;} }
+
+.case-header{
+  display:flex;
+  align-items:baseline;
+  gap:14px;
+  margin-bottom:8px;
+  flex-wrap:wrap;
+}
+.case-number{
+  font-family:'IBM Plex Mono',monospace;
+  color:var(--gold);
+  font-size:14px;
+  letter-spacing:2px;
+  border:1px solid var(--gold-dark);
+  padding:3px 10px;
+  border-radius:20px;
+}
+h2.case-title{
+  font-family:'Pirata One', cursive;
+  color:var(--parchment);
+  font-size:clamp(28px,4vw,40px);
+  margin:0;
+}
+.case-lead{
+  color:#b7c7ca;
+  font-size:16px;
+  line-height:1.7;
+  margin:14px 0 30px;
+  max-width:700px;
+}
+
+.file-card{
+  background:var(--parchment);
+  border-radius:4px;
+  box-shadow:var(--shadow);
+  padding:26px 28px;
+  margin-bottom:26px;
+  position:relative;
+  border:1px solid var(--parchment-line);
+}
+.file-card::before{
+  content:attr(data-tag);
+  position:absolute;
+  top:-11px; left:22px;
+  background:var(--gold);
+  color:#2a2004;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:2px;
+  padding:3px 12px;
+  border-radius:3px;
+  box-shadow:0 2px 4px rgba(0,0,0,0.3);
+}
+.file-card h3{
+  font-family:'Pirata One', cursive;
+  font-size:22px;
+  margin:8px 0 12px;
+  color:var(--ink);
+}
+.file-card p{ line-height:1.75; color:var(--ink-soft); margin:0 0 12px; font-size:15.5px;}
+.file-card ul{ padding-left:20px; color:var(--ink-soft); line-height:1.8; }
+
+.analogy{
+  background:#e6d8ac;
+  border-left:5px solid var(--wax-red);
+  padding:16px 18px;
+  border-radius:2px;
+  margin-top:14px;
+}
+.analogy .label{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  color:var(--wax-red);
+  letter-spacing:2px;
+  font-weight:700;
+  margin-bottom:6px;
+  display:block;
+}
+
+.math{
+  font-family:'IBM Plex Mono', monospace;
+  background:#fffdf6;
+  border:1px solid var(--parchment-line);
+  padding:2px 8px;
+  border-radius:3px;
+  font-size:0.95em;
+}
+.math-block{
+  font-family:'IBM Plex Mono', monospace;
+  background:#fffdf6;
+  border:1px dashed var(--parchment-line);
+  padding:14px 16px;
+  border-radius:4px;
+  margin:10px 0;
+  font-size:15.5px;
+  line-height:1.9;
+  overflow-x:auto;
+}
+
+.worked{
+  background:#fffdf6;
+  border:1px solid var(--parchment-line);
+  border-radius:4px;
+  padding:18px 20px;
+  margin:14px 0;
+}
+.worked .q{
+  font-family:'IBM Plex Mono',monospace;
+  font-weight:600;
+  font-size:16px;
+  color:var(--ink);
+  margin-bottom:10px;
+}
+.worked .step{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:14.5px;
+  color:var(--ink-soft);
+  padding:4px 0 4px 16px;
+  border-left:2px solid var(--parchment-line);
+  margin-left:4px;
+}
+.worked .step .tag{ color:var(--sea-green); font-family:'Inter',sans-serif; font-weight:600; font-size:12px; margin-right:8px;}
+
+.data-table{
+  width:100%;
+  border-collapse:collapse;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:14.5px;
+  margin:10px 0;
+  background:#fffdf6;
+}
+.data-table th, .data-table td{
+  border:1px solid var(--parchment-line);
+  padding:8px 12px;
+  text-align:center;
+}
+.data-table th{ background:var(--parchment-dark); color:var(--ink); }
+.data-table td{ color:var(--ink-soft); }
+
+.practice-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:14px;
+  margin-top:8px;
+}
+@media(min-width:680px){ .practice-grid{ grid-template-columns:1fr 1fr; } }
+.practice-item{
+  background:#fffdf6;
+  border:1px solid var(--parchment-line);
+  border-radius:4px;
+  padding:14px 16px;
+}
+.practice-item .q{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:15px;
+  font-weight:600;
+  margin-bottom:8px;
+}
+.reveal-btn{
+  font-family:'Inter',sans-serif;
+  font-size:12.5px;
+  font-weight:600;
+  color:var(--gold-dark);
+  background:none;
+  border:1px solid var(--gold-dark);
+  padding:5px 12px;
+  border-radius:20px;
+  cursor:pointer;
+  transition:all .15s;
+}
+.reveal-btn:hover{ background:var(--gold-dark); color:#fff; }
+.answer{
+  display:none;
+  margin-top:10px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:14px;
+  color:var(--sea-green);
+  background:#e3efe8;
+  border-left:3px solid var(--sea-green);
+  padding:8px 10px;
+}
+.answer.show{ display:block; }
+
+.tier-label{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:38px 0 4px;
+}
+.section-label{
+  font-family:'IBM Plex Mono',monospace;
+  color:var(--parchment);
+  font-size:13px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  margin:0;
+  opacity:0.8;
+}
+.tier-chip{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  letter-spacing:1px;
+  padding:2px 10px;
+  border-radius:10px;
+  font-weight:700;
+}
+.tier-mild{ background:#dcecdf; color:var(--sea-green-2); }
+.tier-medium{ background:#f3e4bd; color:var(--gold-dark); }
+.tier-spicy{ background:#f2dcdc; color:var(--wax-red-2); }
+
+.nav-buttons{
+  display:flex;
+  justify-content:space-between;
+  margin-top:36px;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.next-btn{
+  font-family:'Pirata One',cursive;
+  background:var(--gold);
+  color:#241d02;
+  border:none;
+  padding:13px 24px;
+  border-radius:4px;
+  font-size:17px;
+  cursor:pointer;
+  box-shadow:0 4px 0 var(--gold-dark);
+  transition:transform .1s;
+}
+.next-btn:active{ transform:translateY(3px); box-shadow:0 1px 0 var(--gold-dark); }
+.next-btn:hover{ filter:brightness(1.08); }
+
+/* ---------- INTERACTIVE GRAPH ---------- */
+.graph-wrap{
+  display:flex;
+  flex-wrap:wrap;
+  gap:24px;
+  align-items:flex-start;
+}
+.graph-canvas-box{
+  background:#fffdf6;
+  border:1px solid var(--parchment-line);
+  border-radius:6px;
+  padding:10px;
+  flex-shrink:0;
+}
+#lineCanvas{ display:block; max-width:100%; }
+.controls{
+  flex:1;
+  min-width:240px;
+  background:#fffdf6;
+  border:1px solid var(--parchment-line);
+  border-radius:6px;
+  padding:18px 20px;
+}
+.control-row{ margin-bottom:18px; }
+.control-row label{
+  display:flex;
+  justify-content:space-between;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:14px;
+  font-weight:600;
+  color:var(--ink);
+  margin-bottom:6px;
+}
+.control-row label span{ color:var(--wax-red); }
+input[type="range"]{
+  width:100%;
+  accent-color:var(--gold-dark);
+}
+.equation-display{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:22px;
+  font-weight:700;
+  color:var(--ink);
+  text-align:center;
+  background:var(--parchment-dark);
+  border-radius:6px;
+  padding:12px;
+  margin-bottom:18px;
+}
+.preset-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+.preset-btn{
+  font-family:'Inter',sans-serif;
+  font-size:12.5px;
+  font-weight:600;
+  background:var(--parchment-dark);
+  border:1px solid var(--parchment-line);
+  color:var(--ink);
+  padding:8px 12px;
+  border-radius:20px;
+  cursor:pointer;
+}
+.preset-btn:hover{ background:var(--gold); }
+.mini-table-wrap{ margin-top:16px; }
+.mini-table-wrap .lbl{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  letter-spacing:1px;
+  color:var(--ink-soft);
+  margin-bottom:6px;
+  display:block;
+}
+
+/* ---------- QUIZ ---------- */
+.quiz-progress{
+  font-family:'IBM Plex Mono',monospace;
+  color:var(--gold);
+  font-size:13px;
+  margin-bottom:16px;
+  letter-spacing:1px;
+}
+.quiz-card{
+  background:var(--parchment);
+  border-radius:4px;
+  box-shadow:var(--shadow);
+  padding:28px;
+  border:1px solid var(--parchment-line);
+}
+.quiz-q{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:17.5px;
+  font-weight:600;
+  margin-bottom:20px;
+  color:var(--ink);
+}
+.quiz-options{ display:grid; gap:10px; }
+.quiz-opt{
+  text-align:left;
+  font-family:'Inter',sans-serif;
+  font-size:15px;
+  background:#fffdf6;
+  border:1.5px solid var(--parchment-line);
+  padding:13px 16px;
+  border-radius:4px;
+  cursor:pointer;
+  transition:all .15s;
+  color:var(--ink);
+}
+.quiz-opt:hover{ border-color:var(--gold-dark); background:#fbf3de; }
+.quiz-opt.correct{ background:#dcecdf; border-color:var(--sea-green); color:var(--sea-green); font-weight:700;}
+.quiz-opt.wrong{ background:#f2dcdc; border-color:var(--wax-red); color:var(--wax-red); font-weight:700;}
+.quiz-opt[disabled]{ cursor:default; }
+.quiz-feedback{
+  margin-top:16px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:14px;
+  padding:12px 14px;
+  border-radius:4px;
+  display:none;
+}
+.quiz-feedback.show{ display:block; }
+.quiz-feedback.ok{ background:#dcecdf; color:var(--sea-green); border-left:4px solid var(--sea-green); }
+.quiz-feedback.no{ background:#f2dcdc; color:var(--wax-red); border-left:4px solid var(--wax-red); }
+.quiz-next{ margin-top:18px; display:none; }
+.quiz-next.show{ display:inline-block; }
+
+.result-wrap{ text-align:center; padding:20px 0; position:relative; }
+.stamp{
+  font-family:'Pirata One',cursive;
+  display:inline-block;
+  border:5px solid var(--wax-red);
+  color:var(--wax-red);
+  padding:14px 30px;
+  font-size:30px;
+  letter-spacing:3px;
+  transform:rotate(-8deg);
+  border-radius:8px;
+  opacity:0.9;
+  margin:18px 0;
+}
+.score-line{ font-family:'IBM Plex Mono',monospace; font-size:17px; color:var(--ink); margin:10px 0; }
+.rank{ font-family:'Pirata One',cursive; font-size:24px; color:var(--gold-dark); margin:14px 0 6px; }
+.retry-btn{
+  margin-top:18px;
+  font-family:'Inter',sans-serif;
+  font-weight:600;
+  background:var(--ink);
+  color:var(--parchment);
+  border:none;
+  padding:11px 22px;
+  border-radius:20px;
+  cursor:pointer;
+}
+
+footer{
+  text-align:center;
+  color:#7c8f92;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12px;
+  padding:30px 20px 50px;
+  letter-spacing:1px;
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <span class="badge">Ship's Chart · QLD Yr 8 Mathematics</span>
+  <h1 class="title">Charting the Linear Seas</h1>
+  <p class="subtitle">Three charts stand between you and your Navigator's badge: <b>Linear Relationships</b>, <b>Finding the Rule</b>, and <b>Reading the Line on a Graph</b>. Chart your course, Cap'n.</p>
+  <div class="memo">
+    <div class="seal">⚓</div>
+    <p>Why chart a straight line at all? Because a huge slice of the real world moves at a constant rate — a ship's steady speed, a phone plan's per-minute cost, a savings account earning the same amount each week. Once you can spot the rule behind a straight line, you can predict the future from just a few data points — that's the whole game of mathematical modelling.</p>
+  </div>
+</div>
+
+<div class="tabs-wrap" id="tabsWrap">
+  <button class="tab active" data-case="case1" onclick="showCase('case1')">🗺️ Chart I — Linear Relationships <span class="stamp-mini">✓</span></button>
+  <button class="tab" data-case="case2" onclick="showCase('case2')">🧭 Chart II — Finding the Rule <span class="stamp-mini">✓</span></button>
+  <button class="tab" data-case="case3" onclick="showCase('case3')">⚓ Chart III — Reading the Line <span class="stamp-mini">✓</span></button>
+  <button class="tab" data-case="quiz" onclick="showCase('quiz')">☠️ Treasure Test <span class="stamp-mini">✓</span></button>
+</div>
+
+<!-- ===================== CHART 1: LINEAR RELATIONSHIPS ===================== -->
+<section class="case active" id="case1">
+  <div class="case-header">
+    <span class="case-number">CHART I</span>
+    <h2 class="case-title">Linear Relationships</h2>
+  </div>
+  <p class="case-lead">A linear relationship is what you get when two things change together at a <b>constant rate</b> — every equal step forward produces the exact same-size jump. Plot it, and you always get a dead-straight line.</p>
+
+  <div class="file-card" data-tag="SHIP'S LOG">
+    <h3>Steady Wind, Straight Line</h3>
+    <p>Imagine a ship sailing with a steady wind in its sails. Every hour, it covers exactly the same distance. Here's the ship's log:</p>
+    <table class="data-table">
+      <tr><th>Time, x (hours)</th><td>0</td><td>1</td><td>2</td><td>3</td></tr>
+      <tr><th>Distance, y (km)</th><td>2</td><td>7</td><td>12</td><td>17</td></tr>
+    </table>
+    <p>Every hour, the distance jumps by exactly <span class="math">+5 km</span>. That constant jump is what makes this relationship <b>linear</b> — and it's exactly what a straight line looks like on a graph.</p>
+    <div class="analogy">
+      <span class="label">OLD SEA DOG'S TIP</span>
+      A steady wind gives a straight line. A gusty, unpredictable wind gives you a wobbly, curved path — not linear at all. If the jump between steps isn't always the same size, it isn't a linear relationship.
+    </div>
+  </div>
+
+  <div class="file-card" data-tag="THE GENERAL RULE">
+    <h3>The Form of Every Linear Rule</h3>
+    <p>Every linear relationship can be written as:</p>
+    <div class="math-block">y = mx + c</div>
+    <ul>
+      <li><span class="math">m</span> is the <b>gradient</b> — the constant rate of change (how much y jumps per step of x). In the ship's log, m = 5.</li>
+      <li><span class="math">c</span> is the <b>y-intercept</b> — the starting value, i.e. the value of y when x = 0. In the ship's log, c = 2 (the ship started 2 km from harbour before it even set off).</li>
+    </ul>
+    <p>So the ship's log above is modelled by the rule <span class="math">y = 5x + 2</span>.</p>
+  </div>
+
+  <div class="tier-label"><div class="section-label">Crew Task</div><span class="tier-chip tier-mild">CALM SEAS</span></div>
+  <div class="practice-grid" id="pg-rel-mild"></div>
+
+  <div class="tier-label"><div class="section-label">Crew Task</div><span class="tier-chip tier-medium">CHOPPY WATERS</span></div>
+  <div class="practice-grid" id="pg-rel-medium"></div>
+
+  <div class="tier-label"><div class="section-label">Crew Task</div><span class="tier-chip tier-spicy">STORM WARNING</span></div>
+  <div class="practice-grid" id="pg-rel-spicy"></div>
+
+  <div class="nav-buttons">
+    <span></span>
+    <button class="next-btn" onclick="showCase('case2')">Open Chart II →</button>
+  </div>
+</section>
+
+<!-- ===================== CHART 2: FINDING THE RULE ===================== -->
+<section class="case" id="case2">
+  <div class="case-header">
+    <span class="case-number">CHART II</span>
+    <h2 class="case-title">Finding the Linear Rule</h2>
+  </div>
+  <p class="case-lead">Given a table or two points, you can work backwards to find the rule <span class="math">y = mx + c</span> that produced them — like a navigator reading a log to figure out the ship's speed and starting point.</p>
+
+  <div class="file-card" data-tag="NAVIGATION METHOD">
+    <h3>Two Steps to Any Rule</h3>
+    <p><b>Step 1 — Find the gradient (m):</b> pick two points and divide the change in y by the change in x:</p>
+    <div class="math-block">m = (y₂ − y₁) ÷ (x₂ − x₁) &nbsp;&nbsp;(also called "rise over run")</div>
+    <p><b>Step 2 — Find the intercept (c):</b> substitute one point into y = mx + c and solve for c. If one of your points already has x = 0, c is simply that y-value.</p>
+    <div class="analogy">
+      <span class="label">OLD SEA DOG'S TIP</span>
+      Think of it like reading a treasure log. The gradient is "treasure found per day" — how fast the pile grows. The intercept is "treasure the crew already had in the chest before counting started." Find the daily rate first, then work out what they started with.
+    </div>
+  </div>
+
+  <div class="file-card" data-tag="WORKED VOYAGE">
+    <h3>Worked Example — From a Table</h3>
+    <div class="worked">
+      <div class="q">Table: x = 0,1,2,3 → y = 2,5,8,11. Find the rule.</div>
+      <div class="step"><span class="tag">STEP 1</span> Gradient: each step of x adds 3 to y, so m = 3</div>
+      <div class="step"><span class="tag">STEP 2</span> At x = 0, y = 2, so c = 2</div>
+      <div class="step"><span class="tag">ANSWER</span> y = 3x + 2</div>
+    </div>
+    <h3>Worked Example — From Two Points</h3>
+    <div class="worked">
+      <div class="q">Points (1, 4) and (3, 10). Find the rule.</div>
+      <div class="step"><span class="tag">STEP 1</span> m = (10 − 4) ÷ (3 − 1) = 6 ÷ 2 = 3</div>
+      <div class="step"><span class="tag">STEP 2</span> Substitute (1, 4): 4 = 3(1) + c → c = 1</div>
+      <div class="step"><span class="tag">ANSWER</span> y = 3x + 1</div>
+    </div>
+    <h3>Worked Example — Negative Gradient</h3>
+    <div class="worked">
+      <div class="q">Points (0, 8) and (4, 0). Find the rule.</div>
+      <div class="step"><span class="tag">STEP 1</span> m = (0 − 8) ÷ (4 − 0) = −8 ÷ 4 = −2</div>
+      <div class="step"><span class="tag">STEP 2</span> One point already has x = 0, so c = 8 directly</div>
+      <div class="step"><span class="tag">ANSWER</span> y = −2x + 8</div>
+    </div>
+  </div>
+
+  <div class="tier-label"><div class="section-label">Crew Task</div><span class="tier-chip tier-mild">CALM SEAS</span></div>
+  <div class="practice-grid" id="pg-rule-mild"></div>
+
+  <div class="tier-label"><div class="section-label">Crew Task</div><span class="tier-chip tier-medium">CHOPPY WATERS</span></div>
+  <div class="practice-grid" id="pg-rule-medium"></div>
+
+  <div class="tier-label"><div class="section-label">Crew Task</div><span class="tier-chip tier-spicy">STORM WARNING</span></div>
+  <div class="practice-grid" id="pg-rule-spicy"></div>
+
+  <div class="nav-buttons">
+    <button class="next-btn" onclick="showCase('case1')">← Back to Chart I</button>
+    <button class="next-btn" onclick="showCase('case3')">Open Chart III →</button>
+  </div>
+</section>
+
+<!-- ===================== CHART 3: READING THE LINE (INTERACTIVE) ===================== -->
+<section class="case" id="case3">
+  <div class="case-header">
+    <span class="case-number">CHART III</span>
+    <h2 class="case-title">Reading the Line on a Graph</h2>
+  </div>
+  <p class="case-lead">Every part of <span class="math">y = mx + c</span> has a job on the graph. Play with the sliders below and watch the line move — you're the captain now.</p>
+
+  <div class="file-card" data-tag="THE COMPASS">
+    <h3>What m and c Actually Do</h3>
+    <ul>
+      <li><b>Gradient (m)</b> is the steepness and direction. Positive m → the line sails <i>uphill</i> left to right. Negative m → it sails <i>downhill</i>. The bigger the number (ignoring the sign), the steeper the climb or drop. m = 0 is dead calm — a flat, horizontal line.</li>
+      <li><b>Y-intercept (c)</b> is the ship's home port — the exact spot where the line crosses the y-axis, when x = 0.</li>
+    </ul>
+    <div class="analogy">
+      <span class="label">OLD SEA DOG'S TIP</span>
+      Picture the y-axis as the harbour wall. c tells you exactly where on that wall your voyage begins. m tells you which way you sail from there, and how steeply you climb or dive as you go.
+    </div>
+  </div>
+
+  <div class="file-card" data-tag="INTERACTIVE CHART">
+    <h3>Steer the Line</h3>
+    <div class="graph-wrap">
+      <div class="graph-canvas-box">
+        <canvas id="lineCanvas" width="440" height="440"></canvas>
+      </div>
+      <div class="controls">
+        <div class="equation-display" id="eqDisplay">y = 1x + 0</div>
+        <div class="control-row">
+          <label>Gradient (m) <span id="mVal">1</span></label>
+          <input type="range" id="mSlider" min="-3" max="3" step="0.5" value="1">
+        </div>
+        <div class="control-row">
+          <label>Y-intercept (c) <span id="cVal">0</span></label>
+          <input type="range" id="cSlider" min="-8" max="8" step="1" value="0">
+        </div>
+        <div class="preset-row">
+          <button class="preset-btn" onclick="setPreset(2,3)">Steady Voyage (m=2, c=3)</button>
+          <button class="preset-btn" onclick="setPreset(-1,5)">Retreating Tide (m=−1, c=5)</button>
+          <button class="preset-btn" onclick="setPreset(0,4)">Dead Calm (m=0, c=4)</button>
+        </div>
+        <div class="mini-table-wrap">
+          <span class="lbl">LIVE POINTS ON THIS LINE</span>
+          <table class="data-table" id="liveTable"></table>
+        </div>
+      </div>
+    </div>
+    <p style="margin-top:16px;">Notice: every time x goes up by 1, y changes by exactly m. That's the gradient in action — the constant rate of change you first spotted back in Chart I.</p>
+  </div>
+
+  <div class="tier-label"><div class="section-label">Crew Task</div><span class="tier-chip tier-mild">CALM SEAS</span></div>
+  <div class="practice-grid" id="pg-graph-mild"></div>
+
+  <div class="tier-label"><div class="section-label">Crew Task</div><span class="tier-chip tier-medium">CHOPPY WATERS</span></div>
+  <div class="practice-grid" id="pg-graph-medium"></div>
+
+  <div class="tier-label"><div class="section-label">Crew Task</div><span class="tier-chip tier-spicy">STORM WARNING</span></div>
+  <div class="practice-grid" id="pg-graph-spicy"></div>
+
+  <div class="nav-buttons">
+    <button class="next-btn" onclick="showCase('case2')">← Back to Chart II</button>
+    <button class="next-btn" onclick="showCase('quiz')">Take the Treasure Test →</button>
+  </div>
+</section>
+
+<!-- ===================== FINAL QUIZ ===================== -->
+<section class="case" id="quiz">
+  <div class="case-header">
+    <span class="case-number">FINAL EXAM</span>
+    <h2 class="case-title">Treasure Test — 10 Questions</h2>
+  </div>
+  <p class="case-lead">Mixed charts. Instant feedback after every answer. Solve all 10 to earn your Navigator's badge.</p>
+
+  <div id="quizArea"></div>
+</section>
+
+<footer>CHARTING THE LINEAR SEAS — QLD YEAR 8 MATHEMATICS — AC9M8A02 · AC9M8A03</footer>
+
+<script>
+/* ---------------- Tab switching ---------------- */
+function showCase(id){
+  document.querySelectorAll('.case').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelector('.tab[data-case="'+id+'"]').classList.add('active');
+  window.scrollTo({top: document.getElementById('tabsWrap').offsetTop - 4, behavior:'smooth'});
+}
+
+/* ---------------- Reveal-answer practice builder ---------------- */
+function buildPractice(containerId, items){
+  const wrap = document.getElementById(containerId);
+  items.forEach((item, idx)=>{
+    const div = document.createElement('div');
+    div.className = 'practice-item';
+    const btnId = containerId + '-' + idx;
+    div.innerHTML = `
+      <div class="q">${item.q}</div>
+      <button class="reveal-btn" onclick="toggleAnswer('${btnId}')">Reveal answer</button>
+      <div class="answer" id="${btnId}">${item.a}</div>
+    `;
+    wrap.appendChild(div);
+  });
+}
+function toggleAnswer(id){
+  document.getElementById(id).classList.toggle('show');
+}
+
+/* Chart I — Linear Relationships practice */
+buildPractice('pg-rel-mild', [
+  {q:'A table shows x: 0,1,2,3 and y: 1,4,7,10. Is this a linear relationship? Why?', a:'Yes — y increases by a constant +3 for every step of x.'},
+]);
+buildPractice('pg-rel-medium', [
+  {q:'A table shows x: 0,1,2,3 and y: 1,3,7,13. Is this linear? Why or why not?', a:'No — the jumps are +2, +4, +6. Not constant, so not linear.'},
+]);
+buildPractice('pg-rel-spicy', [
+  {q:'A submarine starts at −10 m (below sea level) and rises 4 m every minute. Write the rule y = mx + c for its depth y after x minutes.', a:'y = 4x − 10 (m = 4 rate of rise, c = −10 starting depth)'},
+]);
+
+/* Chart II — Finding the Rule practice */
+buildPractice('pg-rule-mild', [
+  {q:'Table: x = 0,1,2,3 → y = 3,6,9,12. Find the rule.', a:'m = 3 (constant jump), c = 3 (value at x=0) → y = 3x + 3'},
+]);
+buildPractice('pg-rule-medium', [
+  {q:'Points (2, 7) and (4, 11). Find the rule.', a:'m = (11−7)÷(4−2) = 2; substitute (2,7): 7 = 2(2)+c → c = 3 → y = 2x + 3'},
+]);
+buildPractice('pg-rule-spicy', [
+  {q:'Points (1, 9) and (4, 0). Find the rule.', a:'m = (0−9)÷(4−1) = −3; substitute (1,9): 9 = −3(1)+c → c = 12 → y = −3x + 12'},
+]);
+
+/* Chart III — Reading the Line practice */
+buildPractice('pg-graph-mild', [
+  {q:'For the line y = 4x + 2, what is the y-intercept?', a:'c = 2 — the line crosses the y-axis at (0, 2)'},
+]);
+buildPractice('pg-graph-medium', [
+  {q:'Line A has gradient 2. Line B has gradient −5. Which line is steeper, and which direction does each face?', a:'Line B is steeper (|−5| > |2|). Line A rises left to right; Line B falls left to right.'},
+]);
+buildPractice('pg-graph-spicy', [
+  {q:'A line passes through (0, −3) and rises 2 units for every 1 unit it moves right. Write its equation, then state one other point on the line.', a:'y = 2x − 3 (m=2 from the rise/run, c=−3 from the given point). E.g. at x=1, y = −1, so (1, −1) is on the line.'},
+]);
+
+/* ---------------- INTERACTIVE GRAPH ---------------- */
+const canvas = document.getElementById('lineCanvas');
+const ctx = canvas.getContext('2d');
+const range = 10;
+const size = canvas.width;
+const scale = size / (2 * range);
+
+function toPx(x, y){
+  return { px: size/2 + x*scale, py: size/2 - y*scale };
+}
+
+function drawGraph(m, c){
+  ctx.clearRect(0,0,size,size);
+
+  // gridlines
+  ctx.strokeStyle = '#e4d8b8';
+  ctx.lineWidth = 1;
+  for(let i=-range; i<=range; i++){
+    if(i===0) continue;
+    const p1 = toPx(i, -range), p2 = toPx(i, range);
+    ctx.beginPath(); ctx.moveTo(p1.px, p1.py); ctx.lineTo(p2.px, p2.py); ctx.stroke();
+    const q1 = toPx(-range, i), q2 = toPx(range, i);
+    ctx.beginPath(); ctx.moveTo(q1.px, q1.py); ctx.lineTo(q2.px, q2.py); ctx.stroke();
+  }
+
+  // axes
+  ctx.strokeStyle = '#6b5636';
+  ctx.lineWidth = 2;
+  const ax1 = toPx(-range,0), ax2 = toPx(range,0);
+  ctx.beginPath(); ctx.moveTo(ax1.px, ax1.py); ctx.lineTo(ax2.px, ax2.py); ctx.stroke();
+  const ay1 = toPx(0,-range), ay2 = toPx(0,range);
+  ctx.beginPath(); ctx.moveTo(ay1.px, ay1.py); ctx.lineTo(ay2.px, ay2.py); ctx.stroke();
+
+  // axis labels every 2 units
+  ctx.fillStyle = '#6b5636';
+  ctx.font = '11px IBM Plex Mono, monospace';
+  ctx.textAlign = 'center';
+  for(let i=-range; i<=range; i+=2){
+    if(i===0) continue;
+    const p = toPx(i, 0);
+    ctx.fillText(i, p.px, p.py + 14);
+    const q = toPx(0, i);
+    ctx.fillText(i, q.px - 12, q.py + 4);
+  }
+
+  // the line, clipped to plot bounds
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0,0,size,size);
+  ctx.clip();
+  const p1 = toPx(-range*2, m*(-range*2)+c);
+  const p2 = toPx(range*2, m*(range*2)+c);
+  ctx.strokeStyle = '#7a2e2e';
+  ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(p1.px, p1.py); ctx.lineTo(p2.px, p2.py); ctx.stroke();
+  ctx.restore();
+
+  // y-intercept marker
+  const ip = toPx(0, c);
+  if(Math.abs(c) <= range){
+    ctx.fillStyle = '#d4af37';
+    ctx.beginPath(); ctx.arc(ip.px, ip.py, 6, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#3b2a14'; ctx.lineWidth = 1.5; ctx.stroke();
+  }
+}
+
+function formatEq(m, c){
+  if(m === 0){
+    return 'y = ' + c;
+  }
+  let mPart;
+  if(m === 1){ mPart = 'x'; }
+  else if(m === -1){ mPart = '−x'; }
+  else if(m < 0){ mPart = '−' + Math.abs(m) + 'x'; }
+  else { mPart = m + 'x'; }
+  const cPart = c === 0 ? '' : (c > 0 ? ' + ' + c : ' − ' + Math.abs(c));
+  return 'y = ' + mPart + cPart;
+}
+
+function updateLiveTable(m, c){
+  const xs = [-2,-1,0,1,2];
+  let html = '<tr><th>x</th>' + xs.map(x=>'<td>'+x+'</td>').join('') + '</tr>';
+  html += '<tr><th>y</th>' + xs.map(x=>'<td>'+(m*x+c)+'</td>').join('') + '</tr>';
+  document.getElementById('liveTable').innerHTML = html;
+}
+
+function updateGraph(){
+  const m = parseFloat(document.getElementById('mSlider').value);
+  const c = parseFloat(document.getElementById('cSlider').value);
+  document.getElementById('mVal').textContent = m;
+  document.getElementById('cVal').textContent = c;
+  document.getElementById('eqDisplay').textContent = formatEq(m, c);
+  drawGraph(m, c);
+  updateLiveTable(m, c);
+}
+
+function setPreset(m, c){
+  document.getElementById('mSlider').value = m;
+  document.getElementById('cSlider').value = c;
+  updateGraph();
+}
+
+document.getElementById('mSlider').addEventListener('input', updateGraph);
+document.getElementById('cSlider').addEventListener('input', updateGraph);
+updateGraph();
+
+/* ---------------- QUIZ ENGINE ---------------- */
+const quizData = [
+  {q:'In y = mx + c, what does m represent?', opts:['The gradient (rate of change)','The y-intercept','The x-intercept','The value of y when x=0'], correct:0,
+   explain:'m is the gradient — how much y changes for every 1 unit x increases.'},
+  {q:'In y = mx + c, what does c represent?', opts:['The y-intercept (value of y when x=0)','The gradient','The steepness of the line','The x-value where the line starts'], correct:0,
+   explain:'c is the y-intercept — the value of y exactly when x = 0, where the line crosses the y-axis.'},
+  {q:'A ship travels at a constant speed of 5 km/h, starting 2 km from harbour. Which rule models its distance y after x hours?', opts:['y = 5x + 2','y = 2x + 5','y = 5x − 2','y = x + 7'], correct:0,
+   explain:'Rate (gradient) is 5 km/h, and the starting distance (intercept) is 2 km, giving y = 5x + 2.'},
+  {q:'Find the gradient between the points (1, 4) and (3, 10).', opts:['3','6','2','5'], correct:0,
+   explain:'m = (10 − 4) ÷ (3 − 1) = 6 ÷ 2 = 3.'},
+  {q:'A line has gradient 3 and y-intercept 1. What is its equation?', opts:['y = 3x + 1','y = x + 3','y = 3x − 1','y = 1x + 3'], correct:0,
+   explain:'Substitute m = 3 and c = 1 directly into y = mx + c.'},
+  {q:'A table shows x: 0,1,2,3 and y: 4,7,10,13. What is the rule?', opts:['y = 3x + 4','y = 4x + 3','y = 3x + 3','y = 4x + 4'], correct:0,
+   explain:'Each step of x adds 3 to y, so m = 3. At x = 0, y = 4, so c = 4, giving y = 3x + 4.'},
+  {q:'Which gradient makes a line steeper: m = 2 or m = 5?', opts:['m = 5','m = 2','They are equally steep','Cannot tell without a graph'], correct:0,
+   explain:'The bigger the size of the gradient (ignoring sign), the steeper the line — 5 is steeper than 2.'},
+  {q:'A line has a negative gradient. What does its graph look like?', opts:['It falls from left to right','It rises from left to right','It is horizontal','It is vertical'], correct:0,
+   explain:'A negative gradient means y decreases as x increases, so the line slopes downward left to right.'},
+  {q:'Two points on a line are (0, 6) and (2, 2). Find the equation of the line.', opts:['y = −2x + 6','y = 2x + 6','y = −2x − 6','y = 6x − 2'], correct:0,
+   explain:'m = (2 − 6) ÷ (2 − 0) = −4 ÷ 2 = −2. Since x = 0 gives y = 6, c = 6, giving y = −2x + 6.'},
+  {q:'A market stall profit after x days follows y = 50x − 100 (dollars). What does the −100 represent?', opts:['A starting cost of $100 before any sales','Profit per day is $100','The stall sold 100 items','The gradient is −100'], correct:0,
+   explain:'−100 is the y-intercept — the value of y (profit) when x = 0 days, meaning $100 was spent in setup costs before any sales.'},
+];
+
+let currentQ = 0;
+let score = 0;
+let currentOptions = [];
+const quizArea = document.getElementById('quizArea');
+
+function shuffleOptions(item){
+  const optsWithFlag = item.opts.map((text, i) => ({text, isCorrect: i === item.correct}));
+  for(let i = optsWithFlag.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [optsWithFlag[i], optsWithFlag[j]] = [optsWithFlag[j], optsWithFlag[i]];
+  }
+  return optsWithFlag;
+}
+
+function renderQuiz(){
+  if(currentQ >= quizData.length){
+    renderResult();
+    return;
+  }
+  const item = quizData[currentQ];
+  currentOptions = shuffleOptions(item);
+  quizArea.innerHTML = `
+    <div class="quiz-progress">QUESTION ${currentQ+1} OF ${quizData.length} &nbsp;·&nbsp; SCORE: ${score}</div>
+    <div class="quiz-card">
+      <div class="quiz-q">${item.q}</div>
+      <div class="quiz-options" id="quizOptions"></div>
+      <div class="quiz-feedback" id="quizFeedback"></div>
+      <button class="next-btn quiz-next" id="quizNextBtn" onclick="nextQuestion()">Next →</button>
+    </div>
+  `;
+  const optWrap = document.getElementById('quizOptions');
+  currentOptions.forEach((opt, i)=>{
+    const btn = document.createElement('button');
+    btn.className = 'quiz-opt';
+    btn.textContent = opt.text;
+    btn.onclick = ()=>answerQuiz(i);
+    optWrap.appendChild(btn);
+  });
+}
+
+function answerQuiz(selectedIdx){
+  const item = quizData[currentQ];
+  const buttons = document.querySelectorAll('#quizOptions .quiz-opt');
+  const correctIdx = currentOptions.findIndex(o => o.isCorrect);
+  buttons.forEach((b, i)=>{
+    b.disabled = true;
+    if(i === correctIdx) b.classList.add('correct');
+    if(i === selectedIdx && selectedIdx !== correctIdx) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('quizFeedback');
+  if(selectedIdx === correctIdx){
+    score++;
+    fb.className = 'quiz-feedback show ok';
+    fb.textContent = '✓ Correct. ' + item.explain;
+  } else {
+    fb.className = 'quiz-feedback show no';
+    fb.textContent = '✗ Not quite. ' + item.explain;
+  }
+  document.getElementById('quizNextBtn').classList.add('show');
+  document.getElementById('quizNextBtn').textContent = (currentQ === quizData.length - 1) ? 'See Final Result →' : 'Next Question →';
+}
+
+function nextQuestion(){
+  currentQ++;
+  renderQuiz();
+}
+
+function renderResult(){
+  let rank, stampWord;
+  const pct = score / quizData.length;
+  if(score === 10){ rank = 'Master Navigator'; stampWord='TREASURE FOUND'; }
+  else if(pct >= 0.8){ rank = 'First Mate'; stampWord='CHARTED'; }
+  else if(pct >= 0.5){ rank = 'Deckhand'; stampWord='COURSE SET'; }
+  else { rank = 'Landlubber'; stampWord='REPLOT COURSE'; }
+
+  quizArea.innerHTML = `
+    <div class="quiz-card result-wrap">
+      <div class="quiz-progress" style="text-align:center;">VOYAGE COMPLETE</div>
+      <div class="score-line">Final score: ${score} / ${quizData.length}</div>
+      <div class="stamp">${stampWord}</div>
+      <div class="rank">Rank Achieved: ${rank}</div>
+      <button class="retry-btn" onclick="restartQuiz()">Set Sail Again (Retry Quiz)</button>
+    </div>
+  `;
+  document.querySelector('.tab[data-case="quiz"]').classList.add('solved');
+}
+
+function restartQuiz(){
+  currentQ = 0;
+  score = 0;
+  renderQuiz();
+}
+
+renderQuiz();
+
+['case1','case2','case3'].forEach(id=>{
+  document.getElementById(id).addEventListener('click', ()=>{
+    document.querySelector('.tab[data-case="'+id+'"]').classList.add('solved');
+  });
+});
+</script>
+</body>
+</html>
